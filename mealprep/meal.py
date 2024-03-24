@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import collections
+from collections.abc import Iterable
 import copy
 import datetime as dt
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
 from mealprep.basic_iterator import BasicIterator
 from mealprep.constants import BaseEnum, MealMeat, MealMetadata, MealProperty, MealTag, Unit
@@ -21,7 +24,7 @@ class Meal:
         self,
         name: str,
         ingredient_quantities: IngredientQuantityCollection,
-        properties: Dict[MealProperty, Any],
+        properties: dict[MealProperty, Any],
         tags: Optional[Union[MealTag, Iterable[MealTag]]] = tuple(),
     ):
         self.name = name
@@ -115,13 +118,23 @@ class MealCollection:
         raise TypeError("'other' must be one of Meal or MealCollection")
 
     def __eq__(self, other: "MealCollection") -> bool:
-        return set(self.meals) == set(other.meals)
+        if not isinstance(other, MealCollection):
+            return False
+
+        if len(self) != len(other):
+            return False
+
+        for x in self:
+            if x not in other:
+                return False
+
+        return True
 
 
 class MealDiary:
     DATE_FORMAT = "%Y-%m-%d"
 
-    def __init__(self, meal_diary: Optional[Dict[dt.date, Meal]] = None):
+    def __init__(self, meal_diary: Optional[dict[dt.date, Meal]] = None):
         if meal_diary is not None:
             if not isinstance(meal_diary, dict):
                 raise TypeError("meal_diary, if specified, must be a dictionary in MealDiary init")
@@ -165,7 +178,7 @@ class MealDiary:
     def items(self):
         return self.meal_diary.items()
 
-    def get_representation(self) -> Dict[str, str]:
+    def get_representation(self) -> dict[str, str]:
         """
         Represent the instance as a dictionary mapping date strings to
         meal names
@@ -960,7 +973,7 @@ class Meals(BaseEnum):
             IngredientQuantity(Ingredients.ONION, Unit.NUMBER, 2),
             IngredientQuantity(Ingredients.PASSATA, Unit.MILLILITRE, 500),
             IngredientQuantity(Ingredients.RICE, Unit.GRAM, 400),
-            IngredientQuantity(Ingredients.TOMATO_SOUP, Unit.GRAM, 1),
+            IngredientQuantity(Ingredients.TOMATO_SOUP, Unit.JAR, 1),
             IngredientQuantity(Ingredients.TURKEY_MINCE, Unit.GRAM, 500),
         ),
         properties={

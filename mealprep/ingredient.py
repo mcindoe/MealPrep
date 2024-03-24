@@ -80,6 +80,19 @@ class IngredientQuantityCollection:
     def __iter__(self):
         return BasicIterator(self.ingredient_quantities)
 
+    def __eq__(self, other: "IngredientQuantityCollection") -> bool:
+        if not isinstance(other, IngredientQuantityCollection):
+            return False
+
+        if len(self.ingredient_quantities) != len(other.ingredient_quantities):
+            return False
+
+        for x in self:
+            if x not in other:
+                return False
+
+        return True
+
 
 # TODO: Perhaps a CSV for these? Do I ever need to enumerate over these? I can just generate a runtime list
 # of available options if I need to do that?
@@ -251,3 +264,15 @@ class Ingredients(BaseEnum):
     WORCESTERSHIRE_SAUCE = Ingredient("Worcestershire Sauce", Category.SAUCE)
     YELLOW_PEPPER = Ingredient("Yellow Pepper", Category.VEGETABLE)
     YOGURT = Ingredient("Yogurt", Category.DAIRY)
+
+
+UPPER_INGREDIENT_NAME_TO_INGREDIENT_MAP = {
+    ingredient.value.name.upper(): ingredient for ingredient in Ingredients
+}
+
+
+def get_ingredient_from_name(ingredient_name: str) -> Ingredient:
+    try:
+        return UPPER_INGREDIENT_NAME_TO_INGREDIENT_MAP[ingredient_name.upper()]
+    except KeyError as exc:
+        raise ValueError(f"Unable to find an Ingredient with name {ingredient_name}") from exc
